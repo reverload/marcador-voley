@@ -6,10 +6,11 @@
 /* Layout: one screen, two court-coloured halves split by a net band; stacked in portrait, side by side in landscape. Deliberately single dark look (pabellón). */
 :root {
   --floor: #10131c;      /* pabellón a oscuras */
-  --court: #c9592c;      /* pista naranja: mi equipo */
-  --zone:  #1f4f9a;      /* zona libre azul: rival */
+  --court: #c9592c;      /* pista naranja: equipo local */
+  --zone:  #1f4f9a;      /* zona libre azul: visitante */
   --ink:   #fbf7f0;
-  --muted: rgba(251,247,240,.62);
+  --muted: rgba(251,247,240,.66);
+  --faint: rgba(251,247,240,.42);
   --tape:  #f4efe4;      /* cinta de la red */
   --gold:  #f3c044;
   --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
@@ -17,6 +18,7 @@
   color-scheme: dark;
 }
 html, body { height: 100%; }
+[hidden] { display: none !important; }
 body {
   margin: 0; background: var(--floor); color: var(--ink);
   font-family: var(--body); overflow: hidden;
@@ -24,7 +26,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 button { font: inherit; color: inherit; touch-action: manipulation; cursor: pointer; }
-button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+button:focus-visible, input:focus-visible, .side:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
 
 #app { height: 100%; display: flex; flex-direction: column; }
 
@@ -33,11 +35,10 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 8px 12px; background: var(--floor); flex: none;
 }
-.setinfo { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
-.setno { font-family: var(--display); font-weight: 900; font-size: 1.6rem; letter-spacing: .04em; text-transform: uppercase; }
-.setsum { font-family: var(--display); font-weight: 700; font-size: 1.25rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.hist { display: flex; gap: 6px; overflow: hidden; }
-.hist span { font-size: .85rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.setinfo { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.setno { font-family: var(--display); font-weight: 900; font-size: 1.6rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.setsum { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.setsum small { font-family: var(--body); font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-left: 4px; }
 .tools { display: flex; gap: 4px; flex: none; }
 .tools button {
   width: 42px; height: 42px; border-radius: 10px; border: 0;
@@ -51,39 +52,44 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 .court { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .court.swapped { flex-direction: column-reverse; }
 .side {
-  flex: 1; min-height: 0; position: relative; border: 0; padding: 12px 16px;
-  display: grid; grid-template-rows: auto 1fr auto; text-align: left;
-  overflow: hidden;
+  flex: 1; min-height: 0; position: relative; padding: 12px 16px; cursor: pointer;
+  display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+  touch-action: manipulation;
 }
 .side.a { background: var(--court); }
 .side.b { background: var(--zone); }
 .side:active .score { transform: scale(.97); }
-.head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; min-height: 34px; }
 .name {
-  font-weight: 700; font-size: clamp(1.2rem, 5vw, 2rem); text-transform: uppercase; letter-spacing: .06em;
+  font-weight: 700; font-size: clamp(1.25rem, 5.4vw, 2rem); text-transform: uppercase; letter-spacing: .05em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
 }
-.serve { display: none; align-items: center; gap: 5px; font-size: .9rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; flex: none; }
-.serve svg { width: 20px; height: 20px; }
+.serve {
+  display: none; align-items: center; gap: 6px; flex: none;
+  padding: 3px 12px 3px 3px; border-radius: 999px; background: rgba(0,0,0,.28);
+  font-size: .9rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+}
+.serve svg { width: 26px; height: 26px; display: block; }
 .side.serving .serve { display: inline-flex; }
 .score {
   font-family: var(--display); font-weight: 900; line-height: .8; text-align: center; align-self: center;
-  font-size: min(31dvh, 68vw); font-variant-numeric: tabular-nums; transition: transform .08s;
+  font-size: min(30dvh, 66vw); font-variant-numeric: tabular-nums; transition: transform .08s;
   text-shadow: 0 4px 0 rgba(0,0,0,.18);
 }
 .score.bump { animation: bump .25s ease-out; }
 @keyframes bump { 0% { transform: scale(1.08); } 100% { transform: scale(1); } }
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.dots { display: flex; gap: 8px; align-items: center; }
-.dots i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); }
+.record { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.dots { display: flex; gap: 7px; align-items: center; flex: none; }
+.dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.7); }
 .dots i.on { background: var(--gold); border-color: var(--gold); }
-.dots b { font-weight: 600; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-left: 4px; }
+.parciales { display: flex; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.35rem; font-variant-numeric: tabular-nums; color: var(--faint); overflow: hidden; }
+.parciales .win { color: var(--ink); }
 .minus {
-  width: 52px; height: 44px; border-radius: 12px; border: 2px solid rgba(255,255,255,.45);
+  flex: none; width: 52px; height: 44px; border-radius: 12px; border: 2px solid rgba(255,255,255,.45);
   background: rgba(0,0,0,.15); font-size: 1.6rem; font-weight: 700; line-height: 1;
 }
 .minus:active { background: rgba(0,0,0,.35); }
-.hint { position: absolute; right: 16px; top: 14px; font-size: .8rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
 
 /* Red */
 .net {
@@ -106,7 +112,16 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
       repeating-linear-gradient(-45deg, rgba(255,255,255,.35) 0 1px, transparent 1px 6px),
       #0b0d13;
   }
-  .score { font-size: min(58dvh, 34vw); }
+  .score { font-size: min(56dvh, 33vw); }
+  .name { font-size: clamp(1.1rem, 2.8vw, 2rem); }
+}
+
+/* Aviso breve */
+.toast {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5;
+  background: var(--floor); color: var(--ink); border: 2px solid var(--gold); border-radius: 14px;
+  padding: 12px 22px; font-family: var(--display); font-weight: 900; font-size: 1.8rem;
+  text-transform: uppercase; letter-spacing: .04em; pointer-events: none; white-space: nowrap;
 }
 
 /* Capas */
@@ -130,17 +145,17 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 }
 .btn.primary { background: var(--gold); color: #1a1406; }
 .btn.danger { background: #8e2b20; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-size: .85rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field > label, .field > .lab { font-size: .85rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .field input {
   height: 46px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: #0f131c;
   color: var(--ink); font: inherit; font-size: 1.2rem; padding: 0 12px;
 }
-.stepper { display: flex; align-items: center; gap: 12px; }
-.stepper span { font-family: var(--display); font-weight: 900; font-size: 2rem; min-width: 1.2em; text-align: center; font-variant-numeric: tabular-nums; }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.stepper span.v { font-family: var(--display); font-weight: 900; font-size: 2rem; min-width: 1.4em; text-align: center; font-variant-numeric: tabular-nums; }
 .stepper button { width: 46px; height: 46px; border-radius: 10px; border: 0; background: rgba(255,255,255,.1); font-size: 1.4rem; font-weight: 700; }
-.stepper .lbl { flex: 1; font-size: 1.15rem; font-weight: 600; }
-.small { font-size: .9rem; color: var(--muted); }
+.stepper .lbl { flex: 1; font-size: 1.15rem; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.small { font-size: .95rem; color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) {
   .score.bump { animation: none; }
@@ -148,12 +163,35 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 }
 </style>
 
+<!-- Balón: tres grupos de paneles en espiral, blanco, amarillo y azul -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <clipPath id="ballClip"><circle cx="16" cy="16" r="13.6"/></clipPath>
+    <symbol id="ball" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="15" fill="#10131c"/>
+      <circle cx="16" cy="16" r="13.6" fill="#fbf7f0"/>
+      <g clip-path="url(#ballClip)">
+        <g id="ballPanel">
+          <path d="M16 16 C 15 10.5, 11.5 6.5, 5 4.5 L 2 11 C 7 11, 12 12.5, 16 16 Z" fill="#f3c044"/>
+          <path d="M16 16 C 15 10.5, 11.5 6.5, 5 4.5 L 4 -2 L 13 -2 L 13 1.5 C 17.5 4.5, 20 8.5, 20.5 13 Z" fill="#2f6fd6"/>
+        </g>
+        <use href="#ballPanel" transform="rotate(120 16 16)"/>
+        <use href="#ballPanel" transform="rotate(240 16 16)"/>
+      </g>
+      <g fill="none" stroke="#10131c" stroke-width="1.2" stroke-linecap="round" clip-path="url(#ballClip)">
+        <g id="ballSeams"><path d="M16 16 C 15 10.5, 11.5 6.5, 5 4.5"/><path d="M16 16 C 12 12.5, 7 11, 1 11"/><path d="M20.5 13 C 20 8.5, 17.5 4.5, 13 1.5"/></g>
+        <use href="#ballSeams" transform="rotate(120 16 16)"/>
+        <use href="#ballSeams" transform="rotate(240 16 16)"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
 <div id="app">
   <header class="bar">
     <div class="setinfo">
-      <span class="setno" id="setno">Set 4</span>
-      <span class="setsum" id="setsum">2–1</span>
-      <div class="hist" id="hist"></div>
+      <span class="setno" id="setno">Set 3</span>
+      <span class="setsum" id="setsum">1–1<small>sets</small></span>
     </div>
     <div class="tools">
       <button id="undo" aria-label="Deshacer último punto" title="Deshacer">
@@ -162,7 +200,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
       <button id="swap" aria-label="Cambiar de campo" title="Cambiar de campo">
         <svg viewBox="0 0 24 24"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>
       </button>
-      <button id="full" aria-label="Pantalla completa" title="Pantalla completa">
+      <button id="full" aria-label="Pantalla completa" title="Pantalla completa" hidden>
         <svg viewBox="0 0 24 24"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg>
       </button>
       <button id="menu" aria-label="Ajustes del partido" title="Ajustes">
@@ -172,26 +210,34 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
   </header>
 
   <main class="court" id="court">
-    <button class="side a" id="side0" aria-label="Punto para mi equipo">
-      <div class="head"><span class="name" id="name0">Mi equipo</span><span class="serve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M12 2.5c-1 4.5.5 8 4.5 10.5M3.2 9c4.3-1.6 8.3-.9 11.3 2.3M7 20.5c.6-4.6 3-7.6 7.5-9"/></svg>Saque</span></div>
-      <div class="score" id="score0">9</div>
-      <div class="foot"><div class="dots" id="dots0"></div><span class="minus" role="button" tabindex="0" id="minus0" aria-label="Quitar punto a mi equipo">−</span></div>
-    </button>
+    <div class="side a" id="side0" role="button" tabindex="0" aria-label="Punto para el local">
+      <div class="head"><span class="name" id="name0"></span><span class="serve"><svg><use href="#ball"/></svg>Saque</span></div>
+      <div class="score" id="score0">0</div>
+      <div class="foot">
+        <div class="record"><div class="dots" id="dots0"></div><div class="parciales" id="parc0"></div></div>
+        <button class="minus" id="minus0" aria-label="Quitar punto al local">−</button>
+      </div>
+    </div>
     <div class="net" aria-hidden="true"></div>
-    <button class="side b" id="side1" aria-label="Punto para el rival">
-      <div class="head"><span class="name" id="name1">Rival</span><span class="serve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M12 2.5c-1 4.5.5 8 4.5 10.5M3.2 9c4.3-1.6 8.3-.9 11.3 2.3M7 20.5c.6-4.6 3-7.6 7.5-9"/></svg>Saque</span></div>
-      <div class="score" id="score1">3</div>
-      <div class="foot"><div class="dots" id="dots1"></div><span class="minus" role="button" tabindex="0" id="minus1" aria-label="Quitar punto al rival">−</span></div>
-    </button>
+    <div class="side b" id="side1" role="button" tabindex="0" aria-label="Punto para el visitante">
+      <div class="head"><span class="name" id="name1"></span><span class="serve"><svg><use href="#ball"/></svg>Saque</span></div>
+      <div class="score" id="score1">0</div>
+      <div class="foot">
+        <div class="record"><div class="dots" id="dots1"></div><div class="parciales" id="parc1"></div></div>
+        <button class="minus" id="minus1" aria-label="Quitar punto al visitante">−</button>
+      </div>
+    </div>
   </main>
 </div>
+
+<div class="toast" id="toast" hidden></div>
 
 <!-- Fin de set / partido -->
 <div class="layer" id="endLayer" hidden>
   <div class="card">
-    <h2 id="endTitle">Set para Mi equipo</h2>
+    <h2 id="endTitle">Set para</h2>
     <div class="big" id="endScore">25–21</div>
-    <p id="endSub">Sets: 3–1</p>
+    <p id="endSub">Sets</p>
     <div class="row">
       <button class="btn" id="endUndo">Deshacer punto</button>
       <button class="btn primary" id="endNext">Siguiente set</button>
@@ -203,14 +249,19 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 <div class="layer" id="menuLayer" hidden>
   <div class="card">
     <h2>Ajustes</h2>
-    <div class="field"><label for="in0">Mi equipo</label><input id="in0" maxlength="20" autocomplete="off"></div>
-    <div class="field"><label for="in1">Rival</label><input id="in1" maxlength="20" autocomplete="off"></div>
+    <div class="field"><label for="in0">Local</label><input id="in0" maxlength="22" autocomplete="off"></div>
+    <div class="field"><label for="in1">Visitante</label><input id="in1" maxlength="22" autocomplete="off"></div>
     <div class="field">
-      <label>Sets ganados</label>
-      <div class="stepper"><span class="lbl" id="stLbl0">Mi equipo</span><button id="st0m" aria-label="Restar set">−</button><span id="st0">2</span><button id="st0p" aria-label="Sumar set">+</button></div>
-      <div class="stepper"><span class="lbl" id="stLbl1">Rival</span><button id="st1m" aria-label="Restar set">−</button><span id="st1">1</span><button id="st1p" aria-label="Sumar set">+</button></div>
+      <span class="lab">Puntos del set actual</span>
+      <div class="stepper"><span class="lbl" id="ptLbl0"></span><button id="pt0m" aria-label="Restar punto">−</button><span class="v" id="pt0">0</span><button id="pt0p" aria-label="Sumar punto">+</button></div>
+      <div class="stepper"><span class="lbl" id="ptLbl1"></span><button id="pt1m" aria-label="Restar punto">−</button><span class="v" id="pt1">0</span><button id="pt1p" aria-label="Sumar punto">+</button></div>
     </div>
-    <p class="small">Toca la mitad de un equipo para sumarle un punto. Sets a 25 y el quinto a 15, siempre con 2 de diferencia.</p>
+    <div class="field">
+      <span class="lab">Sets ganados</span>
+      <div class="stepper"><span class="lbl" id="stLbl0"></span><button id="st0m" aria-label="Restar set">−</button><span class="v" id="st0">0</span><button id="st0p" aria-label="Sumar set">+</button></div>
+      <div class="stepper"><span class="lbl" id="stLbl1"></span><button id="st1m" aria-label="Restar set">−</button><span class="v" id="st1">0</span><button id="st1p" aria-label="Sumar set">+</button></div>
+    </div>
+    <p class="small">Toca la mitad de un equipo para sumarle un punto. Sets a 25 y el quinto a 15, siempre con 2 de diferencia. En el quinto se cambia de campo al llegar a 8.</p>
     <div class="row">
       <button class="btn danger" id="reset">Nuevo partido</button>
       <button class="btn primary" id="close">Listo</button>
@@ -220,9 +271,15 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 
 <script>
 (() => {
-  const KEY = 'marcador-voley-v1';
-  const START = { names: ['Mi equipo', 'Rival'], sets: [2, 1], score: [9, 3], serve: 0, hist: [], ended: null, swapped: false };
-  const fresh = () => ({ names: S ? S.names.slice() : START.names.slice(), sets: [0, 0], score: [0, 0], serve: null, hist: [], ended: null, swapped: false });
+  // AVP Servi-Cop – CV Nueva Castilla (Senior masculino, partido 62184), en juego el tercer set
+  const KEY = 'marcador-voley-62184';
+  const START = {
+    names: ['AVP Servi-Cop', 'Nueva Castilla'],
+    sets: [1, 1], score: [17, 21], serve: 1,
+    hist: [{ n: 1, s: [21, 25] }, { n: 2, s: [25, 21] }],
+    ended: null, swapped: false
+  };
+  const DEFAULT_NAMES = ['Local', 'Visitante'];
 
   let S = null, undo = [];
   try {
@@ -230,6 +287,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
     if (saved && saved.S) { S = saved.S; undo = saved.undo || []; }
   } catch (e) {}
   if (!S) S = JSON.parse(JSON.stringify(START));
+  const fresh = () => ({ names: S.names.slice(), sets: [0, 0], score: [0, 0], serve: null, hist: [], ended: null, swapped: false });
 
   const $ = id => document.getElementById(id);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ S, undo: undo.slice(-300) })); } catch (e) {} };
@@ -238,17 +296,35 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
   const setNumber = () => S.sets[0] + S.sets[1] + (S.ended ? 0 : 1);
   const target = () => setNumber() >= 5 ? 15 : 25;
 
+  let toastTimer;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+  }
+
+  // Comprueba si el marcador actual cierra el set
+  function checkSetEnd() {
+    for (const i of [0, 1]) {
+      const me = S.score[i], them = S.score[1 - i];
+      if (me >= target() && me - them >= 2) {
+        S.sets[i]++;
+        S.hist.push({ n: S.sets[0] + S.sets[1], s: S.score.slice() });
+        S.ended = { winner: i, match: S.sets[i] >= 3 };
+        return;
+      }
+    }
+  }
+
   function point(i) {
     if (S.ended) return;
     snap();
     S.score[i]++;
     S.serve = i;
-    const me = S.score[i], them = S.score[1 - i];
-    if (me >= target() && me - them >= 2) {
-      S.sets[i]++;
-      S.hist.push({ n: S.sets[0] + S.sets[1], s: S.score.slice() });
-      S.ended = { winner: i, match: S.sets[i] >= 3 };
+    if (setNumber() === 5 && S.score[i] === 8 && S.score[1 - i] < 8) {
+      S.swapped = !S.swapped;
+      toast('Cambio de campo');
     }
+    checkSetEnd();
     render(i);
   }
 
@@ -262,18 +338,23 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
   function render(bumped) {
     const n = setNumber();
     $('setno').textContent = n === 5 && !S.ended ? 'Set 5 · Tie-break' : 'Set ' + Math.min(n, 5);
-    $('setsum').textContent = S.sets[0] + '–' + S.sets[1];
-    $('hist').innerHTML = S.hist.slice(-4).map(h => `<span>S${h.n} ${h.s[0]}–${h.s[1]}</span>`).join('');
+    $('setsum').innerHTML = S.sets[0] + '–' + S.sets[1] + '<small>sets</small>';
     for (const i of [0, 1]) {
-      $('name' + i).textContent = S.names[i];
-      $('side' + i).setAttribute('aria-label', 'Punto para ' + S.names[i]);
+      const name = S.names[i];
+      $('name' + i).textContent = name;
+      $('side' + i).setAttribute('aria-label', 'Punto para ' + name);
+      $('minus' + i).setAttribute('aria-label', 'Quitar punto a ' + name);
       const sc = $('score' + i);
       sc.textContent = S.score[i];
       if (bumped === i) { sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
       $('side' + i).classList.toggle('serving', S.serve === i);
-      $('dots' + i).innerHTML = [0, 1, 2].map(k => `<i class="${k < S.sets[i] ? 'on' : ''}"></i>`).join('') + '<b>sets</b>';
+      $('dots' + i).innerHTML = [0, 1, 2].map(k => `<i class="${k < S.sets[i] ? 'on' : ''}"></i>`).join('');
+      $('dots' + i).setAttribute('aria-label', S.sets[i] + ' sets ganados');
+      $('parc' + i).innerHTML = S.hist.map(h => `<span class="${h.s[i] > h.s[1 - i] ? 'win' : ''}">${h.s[i]}</span>`).join('');
       $('st' + i).textContent = S.sets[i];
-      $('stLbl' + i).textContent = S.names[i];
+      $('pt' + i).textContent = S.score[i];
+      $('stLbl' + i).textContent = name;
+      $('ptLbl' + i).textContent = name;
     }
     $('court').classList.toggle('swapped', !!S.swapped);
     $('undo').disabled = undo.length === 0;
@@ -292,24 +373,30 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
 
   // Puntos
   for (const i of [0, 1]) {
-    $('side' + i).addEventListener('click', e => { if (e.target.closest('.minus')) return; point(i); });
-    const m = $('minus' + i);
-    m.addEventListener('click', e => { e.stopPropagation(); minus(i); });
-    m.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); minus(i); } });
+    const side = $('side' + i);
+    side.addEventListener('click', e => { if (e.target.closest('.minus')) return; point(i); });
+    side.addEventListener('keydown', e => {
+      if (e.target !== side) return;
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); point(i); }
+    });
+    $('minus' + i).addEventListener('click', e => { e.stopPropagation(); minus(i); });
   }
 
   function doUndo() { if (!undo.length) return; S = JSON.parse(undo.pop()); render(); }
   $('undo').addEventListener('click', doUndo);
   $('endUndo').addEventListener('click', doUndo);
   $('endNext').addEventListener('click', () => {
-    if (S.ended.match) { snap(); S = fresh(); }
-    else { snap(); S.score = [0, 0]; S.ended = null; S.swapped = !S.swapped; }
+    snap();
+    if (S.ended.match) S = fresh();
+    else { S.score = [0, 0]; S.ended = null; S.serve = null; S.swapped = !S.swapped; }
     render();
   });
   $('swap').addEventListener('click', () => { S.swapped = !S.swapped; render(); });
 
-  // Pantalla completa + pantalla siempre encendida
-  $('full').addEventListener('click', async () => {
+  // Pantalla completa (solo donde el navegador la admite; el iPhone no) + pantalla siempre encendida
+  const full = $('full');
+  if (document.fullscreenEnabled && document.documentElement.requestFullscreen) full.hidden = false;
+  full.addEventListener('click', async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
@@ -332,7 +419,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outl
     $('menuLayer').hidden = false;
   });
   for (const i of [0, 1]) {
-    $('in' + i).addEventListener('input', e => { S.names[i] = e.target.value.trim() || (i ? 'Rival' : 'Mi equipo'); render(); });
+    $('in' + i).addEventListener('input', e => { S.names[i] = e.target.value.trim() || DEFAULT_NAMES[i]; render(); });
+    $('pt' + i + 'p').addEventListener('click', () => { if (!S.ended) { snap(); S.score[i]++; checkSetEnd(); render(); if (S.ended) $('menuLayer').hidden = true; } });
+    $('pt' + i + 'm').addEventListener('click', () => { if (!S.ended && S.score[i] > 0) { snap(); S.score[i]--; render(); } });
     $('st' + i + 'p').addEventListener('click', () => { if (S.sets[i] < 2 && !S.ended) { snap(); S.sets[i]++; render(); } });
     $('st' + i + 'm').addEventListener('click', () => { if (S.sets[i] > 0 && !S.ended) { snap(); S.sets[i]--; render(); } });
   }
